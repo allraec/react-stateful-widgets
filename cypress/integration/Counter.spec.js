@@ -1,56 +1,84 @@
-describe('Counter', () => {
-  const number0 = () => cy.contains('Number 0 is even', { matchCase: false })
-  const number1 = () => cy.contains('Number 1 is odd', { matchCase: false })
-  const number2 = () => cy.contains('Number 2 is even', { matchCase: false })
-  const number3 = () => cy.contains('Number 3 is odd', { matchCase: false })
-  const increment = () => cy.contains('Increment')
-  const decrement = () => cy.contains('Decrement')
-  const reset = () => cy.contains('Reset')
+import { crimson, royalblue } from '../constants'
+import { normalize } from '../helpers'
 
-  it('navigate to the site', () => {
-    cy.visit('http://localhost:1234')
+describe('Counter', () => {
+  const count = () => cy.get('[id=count]')
+  const increment = () => cy.get('[id=increment]')
+  const decrement = () => cy.get('[id=decrement]')
+  const reset = () => cy.get('[id=resetCount]')
+
+  const number_0_is_even = normalize('Number 0 is even')
+  const number_1_is_odd = normalize('Number 1 is odd')
+  const number_2_is_even = normalize('Number 2 is even')
+  const number_3_is_odd = normalize('Number 3 is odd')
+
+  beforeEach(() => {
+    cy.visit('/')
   })
-  it('has an increment button', () => {
-    increment().should('exist')
+
+  describe('Initial state. These tests should already be passing', () => {
+    it('contains the required elements', () => {
+      count().should('exist')
+      decrement().should('exist')
+      increment().should('exist')
+      reset().should('exist')
+    })
+    it('colors and text content are what they should be', () => {
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_0_is_even)
+      })
+      count().should('have.css', 'color', royalblue)
+    })
   })
-  it('has an decrement button', () => {
-    decrement().should('exist')
-  })
-  it('has a reset button', () => {
-    reset().should('exist')
-  })
-  it('displays the correct initial message', () => {
-    number0().should('exist')
-  })
-  it('increments the count', () => {
-    increment().click()
-    number0().should('not.exist')
-    number1().should('exist')
-    increment().click()
-    number1().should('not.exist')
-    number2().should('exist')
-    increment().click()
-    number2().should('not.exist')
-    number3().should('exist')
-  })
-  it('decrements the count', () => {
-    decrement().click()
-    number3().should('not.exist')
-    number2().should('exist')
-    decrement().click()
-    number2().should('not.exist')
-    number1().should('exist')
-  })
-  it('resets the count', () => {
-    reset().click()
-    number1().should('not.exist')
-    number0().should('exist')
-  })
-  it('can render the message in the correct color', () => {
-    number0().should('have.attr', 'style', 'font-size: 1.5em; margin-bottom: 0.3em; color: royalblue;')
-    increment().click()
-    number1().should('have.attr', 'style', 'font-size: 1.5em; margin-bottom: 0.3em; color: crimson;')
-    increment().click()
-    number2().should('have.attr', 'style', 'font-size: 1.5em; margin-bottom: 0.3em; color: royalblue;')
+
+  describe('Counter tests', () => {
+    it('can increment the count', () => {
+      increment().click()
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_1_is_odd)
+      })
+      increment().click()
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_2_is_even)
+      })
+      increment().click()
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_3_is_odd)
+      })
+    })
+    it('decrements the count', () => {
+      increment().click()
+      increment().click()
+      increment().click()
+      // setup end
+      decrement().click()
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_2_is_even)
+      })
+      decrement().click()
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_1_is_odd)
+      })
+      decrement().click()
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_0_is_even)
+      })
+    })
+    it('resets the count', () => {
+      increment().click()
+      increment().click()
+      increment().click()
+      // setup end
+      reset().click()
+      count().should(e => {
+        expect(normalize(e.text())).to.equal(number_0_is_even)
+      })
+    })
+    it('can render the message in the correct color', () => {
+      increment().click()
+      count().should('have.css', 'color', crimson)
+      increment().click()
+      count().should('have.css', 'color', royalblue)
+    })
   })
 })
